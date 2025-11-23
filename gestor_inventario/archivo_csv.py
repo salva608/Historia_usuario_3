@@ -28,3 +28,4 @@ def leer_line(name_archivo):
     except:
         print("Error al leer el archivo")
         return []
+print()
