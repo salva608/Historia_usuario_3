@@ -1,4 +1,4 @@
-from archivo_csv import crear_csv, agregar_line
+from archivo_csv import crear_csv, agregar_line, leer_line
 
 
 inventario = []
@@ -9,9 +9,12 @@ def registrar_producto():
     while True:
         try:
             nombre = str(input("Ingresa el nombre del producto: "))
-            print(nombre.replace("",""))
             precio = float(input("Ingresa el precio: "))
-            cantidad = int(input("Ingresa la cantidad: "))   
+            cantidad = int(input("Ingresa la cantidad: "))
+
+            if precio < 0 or cantidad < 0:
+                print("no se permiten valores negativos")
+                continue
 
             producto = {"nombre": nombre, "precio": precio, "cantidad": cantidad}
             inventario.append(producto)
@@ -22,30 +25,46 @@ def registrar_producto():
 
 def mostrar_producto():
 
-    buscar=(input("Ingresa el nombre del producto a buscar: "))
+    if not inventario:
+        print("Inventario vacío")
+    else:
+        print("Lista de productos:")
+        for p in inventario:
+            print(p)
 
-    print (str(f"Aqui tienes tus productos: {buscar}"))
 
 def buscar_producto():
 
-    nombre_buscar = (input("Ingresa el nombre del producto a editar: "))
-    for buscar in inventario:
-        if buscar["nombre"] == nombre_buscar:
-            print(f"Producto encontrado. {nombre_buscar}")
-    print("Producto no encontrado.")
+    nombre_buscar = input("Ingresa el nombre del producto a buscar: ")
+    encontrado = False
+
+    for producto in inventario:
+        if producto["nombre"] == nombre_buscar:
+            print(producto)
+            encontrado = True
+
+    if not encontrado:
+        print("Producto no encontrado.")
+
+
 
 def editar_producto():
 
     nombre_editar = input("Ingresa el nombre del producto a editar: ")
     for p in inventario:
         if p["nombre"] == nombre_editar:
-            print(f"Producto encontrado. {inventario}")
-            p["nombre"] = input("Nuevo nombre: ")
-            p["precio"] = float(input("Nuevo precio: "))
-            p["cantidad"] = int(input("Nueva cantidad: "))
-            print("Producto editado.")
+            print("Producto encontrado:", p)
+            try:
+                p["nombre"] = input("Nuevo nombre: ")
+                p["precio"] = float(input("Nuevo precio: "))
+                p["cantidad"] = int(input("Nueva cantidad: "))
+                print("Producto editado.")
+            except ValueError:
+                print("Valores inválidos")
             return
+
     print("Producto no encontrado.")
+
 
 
 def eliminar_producto():
@@ -58,7 +77,21 @@ def eliminar_producto():
     print("Producto no encontrado.")
 
 def cargar_estadistica():
-    print
+
+    if not inventario:    
+        print("inventario vacío")
+        return
+    
+    
+    unidades = sum(p["cantidad"] for p in inventario)
+    valor_total = sum(p["precio"] * p["cantidad"] for p in inventario)
+    peoducto_mas_caro = max(inventario, key=lambda p: p["precio"])
+    producto_mayor_stock = max(inventario, key=lambda p: p["cantidad"])
+
+    print("Unidades totales:", unidades)
+    print("Valor total:", valor_total)
+    print("Producto más peoducto_mas_caro:", peoducto_mas_caro["nombre"], "-", peoducto_mas_caro["precio"])
+    print("Mayor producto_mayor_stock:", producto_mayor_stock["nombre"], "-", producto_mayor_stock["cantidad"])
 
 
 def guardar_csv_menu():
@@ -68,7 +101,23 @@ def guardar_csv_menu():
     print("CSV guardado.")
 
 def cargar_csv():
-    print
+    global inventario
+    ruta = input("Nombre del archivo CSV: ")
+    datos = leer_line(ruta)
+
+    if not datos:
+        print("No hay datos para cargar")
+        return
+
+    op = input("¿Sobrescribir inventario? (S/N): ").upper()
+
+    if op == "S":
+        inventario = datos
+    else:
+        inventario.extend(datos)
+
+    print("CSV cargado correctamente.")
+
 
 while True:
     print("MENU")
